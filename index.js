@@ -24,14 +24,77 @@ app.get("/api/hello", function (req, res) {
 });
 
 // API :input enpoint...
+{
+  /* 
 let responseObject = {};
 app.get("/api/:input", (req, res) => {
+  console.log(req.params);
   let input = req.params.input;
+  console.log(typeof input);
   if (input.includes("-")) {
     responseObject["unix"] = new Date(input).getTime();
     responseObject["utc"] = new Date(input).toUTCString();
+  } else {
+    input = parseInt(input);
+    console.log(typeof input);
+    responseObject["unix"] = new Date(input).getTime();
+    responseObject["utc"] = new Date(input).toUTCString();
   }
+
+  if (!responseObject["unix"] || !responseObject["utc"]) {
+    res.json({ error: "Invalid Date" });
+  }
+
   res.json(responseObject);
+});
+
+// API empty :input endpoint...
+app.get("/api", (req, res) => {
+  responseObject["unix"] = new Date().getTime();
+  responseObject["utc"] = new Date().toUTCString();
+
+  res.json(responseObject);
+});
+*/
+}
+
+app.get("/api/:date?", (req, res) => {
+  console.log(req.params.date);
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(req.params.date)) {
+    req.params.date = new Date(req.params.date).toUTCString();
+    var timestp = Date.parse(req.params.date);
+    res.json({ unix: timestp, utc: req.params.date });
+  } else if (/\d{13}/.test(req.params.date)) {
+    var time_unix = parseInt(req.params.date);
+    req.params.date = new Date(time_unix * 1).toUTCString();
+    res.json({ unix: time_unix, utc: req.params.date });
+  } else if (/^\d{2} /.test(req.params.date)) {
+    var UTC_string = " UTC";
+    req.params.date = req.params.date.concat(" ", UTC_string);
+    console.log(req.params.date);
+    req.params.date = new Date(req.params.date).toUTCString();
+    console.log(req.params.date);
+    if (req.params.date != "Invalid Date") {
+      var timestp = Date.parse(req.params.date);
+      res.json({ unix: timestp, utc: req.params.date });
+    } else {
+      req.params.date = "Invalid Date";
+      res.json({ error: req.params.date });
+    }
+  } else if (req.params.date) {
+    req.params.date = "Invalid Date";
+    res.json({ error: req.params.date });
+  } else if (/\/$/.test(req.params.date)) {
+    req.params.date = "Invalid Date";
+    res.json({ error: req.params.date });
+  } else {
+    var time = new Date().getTime();
+    req.params.date = new Date(time * 1).toUTCString();
+    res.json({ unix: time, utc: req.params.date });
+  }
+
+  console.log(req.params);
 });
 
 // Listen on port set in environment variable or default to 3000
